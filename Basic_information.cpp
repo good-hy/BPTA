@@ -2,9 +2,6 @@
 #include <chrono>
 #include <unordered_map>
 
-/***
- * 对当前仍可进行任务工人进行可绕路距离修改
- */
 void Basic_information::Initialize_group(vector<double> &AD, vector<double> &current_Sumdis,
                                          vector<vector<double>> &current_Group_worker_subTrajectoryDis, int current_workID, double nowTime,
                                          vector<CURRENT_WORKERS_GROUP> &current_workerGroup)
@@ -32,9 +29,6 @@ void Basic_information::Initialize_group(vector<double> &AD, vector<double> &cur
     }
 }
 
-/***
- * 获取任务与工人轨迹的最小距离，并修改最小距离点
- */
 double Basic_information::Caculate_mindist_global(int workerid, int taskid, vector<vector<int>> &poi)
 {
     vector<POI> Trajectory;
@@ -56,9 +50,6 @@ double Basic_information::Caculate_mindist_global(int workerid, int taskid, vect
     return mindis;
 }
 
-/**
- * 求解全局内工人和任务的偏好
- */
 int Basic_information::Compute_global_PTPW_Group(vector<vector<pair<int, double>>> &PT, vector<vector<pair<int, double>>> &PW)
 {
 
@@ -120,9 +111,6 @@ int Basic_information::Compute_global_PTPW_Group(vector<vector<pair<int, double>
     return num;
 }
 
-/***
- * 根据当前工人及任务状态获取二者最小距离，并修改最小距离点
- */
 double Basic_information::Caculate_mindist(int workerid, int taskid, vector<int> poi[], vector<CURRENT_TASK_GROUP> &task,
                                            vector<CURRENT_WORKERS_GROUP> &worker)
 {
@@ -145,16 +133,6 @@ double Basic_information::Caculate_mindist(int workerid, int taskid, vector<int>
     return mindis;
 }
 
-/****
- *已修改，增加了三个
- *  1-3 简单的剪枝，4具体的操作
- *
- * 1.判断分数约束
- * 2.判断绕路距离与工人范围关系
- * 3.判断收益约束
- * 4.判断工人和任务之间的时间距离关系CurrentTask_Satisfy
-
- */
 int Basic_information::FindLatestWorkerNew_Greedy(int taskid,
                                                   vector<int> &current_Group_worker_AW,
                                                   vector<double> &current_Group_workerAD,
@@ -206,9 +184,6 @@ int Basic_information::FindLatestWorkerNew_Greedy(int taskid,
     return latest_workerid;
 }
 
-/***
- * 获取任务位置
- */
 void Basic_information::ReadLocationForTask(vector<TASK> &task)
 {
     ifstream in("../../dataset\\Berlin\\Task_LocationBER.txt");
@@ -229,9 +204,6 @@ void Basic_information::ReadLocationForTask(vector<TASK> &task)
     in.close();
 }
 
-/***
- * 输出任务信息
- */
 void Basic_information::showTask(vector<TASK> &task)
 {
     for (int i = 0; i < Number_Task; i++)
@@ -245,9 +217,6 @@ void Basic_information::showTask(vector<TASK> &task)
     }
 }
 
-/***
- * 输出工人信息
- */
 void Basic_information::showWorker(vector<WORKER> &worker)
 {
     for (int i = 0; i < Number_Worker; i++)
@@ -259,26 +228,14 @@ void Basic_information::showWorker(vector<WORKER> &worker)
             cout << "Y：" << worker[i].trajectory[j].Y << " ";
             cout << endl;
         }
-
-        /*   cout<<"endtime："<<worker[i].endTime <<" ";
-           cout<<"range："<<worker[i].range <<" ";
-         cout<<"score："<<worker[i].score<<" ";
-           cout<<endl;
-           */
     }
 }
 
-/***
- * 弧度转角度
- */
 double Basic_information::rad(double d)
 {
     return d * PI / 180.0;
 }
 
-/***
- *获取两点间距离
- */
 double Basic_information::GetDistance(double lat1, double lng1, double lat2, double lng2)
 {
     double s = 0;
@@ -301,11 +258,6 @@ double Basic_information::GetDistance(double lat1, double lng1, double lat2, dou
     return s;
 }
 
-/***
- * @param CT_Worker 工人当前偏好任务列表
- * @param PT 任务偏好列表
- * 计算任务满意度之和，具体计算公式无参考
- */
 double Basic_information::Caculate_Task_Satisfaction_sum(vector<vector<int>> &CT_Worker, vector<vector<pair<int, double>>> &PT)
 {
     double sum = 0;
@@ -334,9 +286,6 @@ double Basic_information::Caculate_Task_Satisfaction_sum(vector<vector<int>> &CT
     return sum;
 }
 
-/***
- * 获取任务满意度avg
- */
 double Basic_information::Caculate_Task_Satisfaction_avg(vector<vector<int>> &CT_Worker, vector<vector<pair<int, double>>> &PT)
 {
 
@@ -350,20 +299,6 @@ double Basic_information::Caculate_Task_Satisfaction_avg(vector<vector<int>> &CT
         {
             matchnum++;
             int taskid = CT_Worker[i][j];
-
-            /*
-             int index = GetIndex_PT(i, taskid, PT);
-
-
-             if (PT[taskid].size() == index)
-                 cout << "未在任务列表中找到工人！" << endl;
-             else
-             {
-                 double s = ((PT[taskid][index].second - 0) / (PT[taskid][0].second - 0));
-
-                 sum = sum + s;
-             }
-            */
 
             auto it = find_if(PT[taskid].begin(), PT[taskid].end(), [workerID](const auto &p)
                               { return p.first == workerID; });
@@ -388,9 +323,6 @@ double Basic_information::Caculate_Task_Satisfaction_avg(vector<vector<int>> &CT
     return 0.2 * matchnum / Number_Task + 0.4 * sum / matchnum;
 }
 
-/***
- * 获取工人满意度avg
- */
 double Basic_information::Caculate_Worker_Satisfaction_avg(vector<vector<int>> &CT_Worker, vector<vector<pair<int, double>>> &PW)
 {
     double allsum = 0;
@@ -406,17 +338,6 @@ double Basic_information::Caculate_Worker_Satisfaction_avg(vector<vector<int>> &
             for (int j = 0; j < CT_Worker[i].size(); j++)
             {
                 int taskid = CT_Worker[i][j];
-                /*
-                int index = GetIndex_PW(i, taskid, PW);
-                if (PW[i].size() == index)
-                    cout << "未在工人i中找到task！" << endl;
-                else
-                {
-                    double s = (PW[i][index].second - 0) / (PW[i][0].second - 0);
-                    sum = sum + s;
-                }
-
-                */
 
                 auto it = find_if(PW[workerID].begin(), PW[workerID].end(), [taskid](const auto &p)
                                   { return p.first == taskid; });
@@ -440,9 +361,6 @@ double Basic_information::Caculate_Worker_Satisfaction_avg(vector<vector<int>> &
     return 0.4 * allsum / Number_Worker + 0 * matchNumber / Number_Worker;
 }
 
-/***
- * 获取工人的任务满意度总和
- */
 double Basic_information::Caculate_Worker_Satisfaction_sum(vector<vector<int>> &CT_Worker, vector<vector<pair<int, double>>> &PW)
 {
     double allsum = 0;
@@ -473,9 +391,6 @@ double Basic_information::Caculate_Worker_Satisfaction_sum(vector<vector<int>> &
     return allsum / c;
 }
 
-/***
- * 获取任务在对应工人偏好表中序列位置
- */
 int Basic_information::GetIndex_PW(int workerid, int taskid, vector<vector<pair<int, double>>> &PW)
 {
 
@@ -488,9 +403,6 @@ int Basic_information::GetIndex_PW(int workerid, int taskid, vector<vector<pair<
     return i;
 }
 
-/***
- * 获取工人在对应任务偏好表中序列位置
- */
 int Basic_information::GetIndex_PT(int workerid, int taskid, vector<vector<pair<int, double>>> &PT)
 {
     int i = 0;
@@ -503,9 +415,6 @@ int Basic_information::GetIndex_PT(int workerid, int taskid, vector<vector<pair<
     return i;
 }
 
-/***
- * 为当前分组内任务计算工人最大绕行距离。
- */
 void Basic_information::computeMaxDitanceTask(double MaxDistanceTask[], vector<CURRENT_TASK_GROUP> currentTask, double current_window_endTime)
 {
 
@@ -515,16 +424,6 @@ void Basic_information::computeMaxDitanceTask(double MaxDistanceTask[], vector<C
     }
 }
 
-/****
- *
- * 以任务为主导判断工人和任务能否匹配。
- *
- * 1. 判断工人到新任务的绕路距离与工人截止时间关系
- * 2. 判断插入新点对前后点的影响
- *      对前面的点无影响
- *      对后面的点的截止时间影响
- *
- */
 bool Basic_information::IfReplace(int workerid, int taskid, int assignedtaskid, vector<double> &AD,
                                   vector<double> detour_distance[], vector<vector<double>> &Worker_subTrajectoryDis,
                                   vector<vector<int>> &CT_Worker, vector<int> poi[], double MaxDistanceTask[], double *current_task_NeedTime,
@@ -604,9 +503,6 @@ bool Basic_information::IfReplace(int workerid, int taskid, int assignedtaskid, 
     }
 }
 
-/***
- * 判断当前工人是否偏好任务
- */
 bool Basic_information::CurrentTask_Satisfy_TSDA(vector<CURRENT_TASK_GROUP> &current_taskGroup, int workerid, int taskid,
                                                  vector<double> &AD, vector<double> current_detour_distance[],
                                                  vector<vector<double>> &current_Worker_subTrajectoryDis, vector<vector<int>> &CT_Worker,
@@ -619,6 +515,7 @@ bool Basic_information::CurrentTask_Satisfy_TSDA(vector<CURRENT_TASK_GROUP> &cur
     }
 
     double ADD = AD[workerid] - 2 * current_detour_distance[taskid][workerid];
+
     if (ADD < 0)
     {
         return false;
@@ -644,6 +541,7 @@ bool Basic_information::CurrentTask_Satisfy_TSDA(vector<CURRENT_TASK_GROUP> &cur
     }
 
     double Time_TO_Task = 0.0;
+
     Time_TO_Task = (current_detour_distance[taskid][workerid] + current_Worker_subTrajectoryDis[workerid][current_detourid] + SumdetouDis) / speed;
 
     if (current_taskGroup[taskid].task.Deadline > Time_TO_Task + nowtime)
@@ -697,16 +595,15 @@ bool Basic_information::CurrentTask_Satisfy_TSDA(vector<CURRENT_TASK_GROUP> &cur
     }
 }
 
-/***
- * 判断当前工人是否偏好任务
- */
 bool Basic_information::CurrentTask_Satisfy(vector<CURRENT_TASK_GROUP> &current_taskGroup, int workerid, int taskid,
                                             vector<double> &AD, vector<double> current_detour_distance[],
                                             vector<vector<double>> &current_Worker_subTrajectoryDis, vector<int> CT_Worker[],
                                             vector<int> poi[], double MaxDistanceTask[], double *current_task_NeedTime, double nowtime)
 {
     int assignedNumber = CT_Worker[workerid].size();
+
     double ADD = AD[workerid] - 2 * current_detour_distance[taskid][workerid];
+
     if (ADD < 0)
     {
 
@@ -787,9 +684,6 @@ bool Basic_information::CurrentTask_Satisfy(vector<CURRENT_TASK_GROUP> &current_
     }
 }
 
-/***
- * 更新任务剩余距离
- */
 void Basic_information::UpdateTaskDeadline(vector<CURRENT_TASK_GROUP> &current_taskGroup, int workerid, int taskid,
                                            vector<double> current_detour_distance[], vector<int> CT_Worker[], vector<int> poi[],
                                            double MaxDistanceTask[], double current_task_NeedTime)
@@ -822,12 +716,6 @@ void Basic_information::UpdateTaskDeadline(vector<CURRENT_TASK_GROUP> &current_t
     }
 }
 
-/****
- * 诗婷原本的代码中的截止时间计算方法为：（距离/速度）*（1+2000）
- * @rangeX区域：是定值，注意是够需要修改。
- * @endtimeX截止时间：是定值，注意是够需要修改
- * 随机生成工人数据；
- */
 void Basic_information::Prodece_Worker_endTime_range_score(vector<WORKER> &worker, vector<double> &Sumdis,
                                                            double endtimeX, double rangeX, double scoreX)
 {
@@ -845,11 +733,6 @@ void Basic_information::Prodece_Worker_endTime_range_score(vector<WORKER> &worke
     }
 }
 
-/*******
- * 修改了任务生成时间，要求开始时间在截止时间之前
- * 注意这里存在无线循环的情况，即，开始时间一直在截止时间之前。
- * 随机生成对应任务数据
- */
 void Basic_information::Prodece_Task_Reward_Minscore_Deadline(vector<TASK> &task)
 {
     std::default_random_engine e1(2013467), e2(365485449), e3(3333), e4(12387);
@@ -878,9 +761,6 @@ void Basic_information::Prodece_Task_Reward_Minscore_Deadline(vector<TASK> &task
     sort(task.begin(), task.end(), cmp_task_start);
 }
 
-/**
- * Sumdis获取每个工人的轨迹距离之和，无需修改
- */
 void Basic_information::Caculate_Sumdist_Trajectory(vector<double> &Sumdis, vector<vector<double>> &global_Worker_subTrajectoryDis,
                                                     vector<WORKER> &worker)
 {
@@ -919,9 +799,6 @@ void Basic_information::Caculate_Sumdist_Trajectory(vector<double> &Sumdis, vect
     }
 }
 
-/***
- * 初始化算法
- */
 void Basic_information::begin_Algorithm(string alg_num)
 {
     global_CT_Worker.clear();
@@ -984,28 +861,6 @@ void Basic_information::updata_current_Info(vector<CURRENT_TASK_GROUP> &current_
     temp_task_group.clear();
 }
 
-/***
- *  @param tasks 全局任务
- *  @param workers 全局工人
- *  @param Wmax 时间窗口
- *  @param Tmax 任务窗口
- *  @param Sumdis 记录每个工人的轨迹距离之和
- *  @param global_Worker_subTrajectoryDis 记录工人每个轨迹点前的距离之和
- * 窗口划分框架
- * 首先根据当前任务分组，获取可以服务的工人
- * 其次考虑当前分组中任务未匹配且能继续分配到下一组的情况。
- *
- * 要求：修改groupTasks_addEndTime的第3、4条
- *
- * 1. 每一组task处于连续的时间窗口Wmax，Wmax；
- * 2. 一组内的task数量不超过Tmax。
- * 3. 若一组任务数量达到为Tmax时，则以当前current_taskGroup的时间重新创建新的窗口。
- *      3.1 任务和工人进行匹配
- *      3.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- * 4. 若已到达当前窗口时间current_window_endTime，纵然当前窗口current_window_endTime的task数量位到达Tmax也创建新的窗口。
- *      4.1 任务和工人进行匹配
- *      4.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- */
 void Basic_information::Grouping_Framework_Greedy(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax,
                                                   vector<double> &Sumdis, vector<vector<double>> &global_Worker_subTrajectoryDis)
 
@@ -1019,8 +874,11 @@ void Basic_information::Grouping_Framework_Greedy(vector<TASK> &tasks, vector<WO
     int current_workID = global_Current_workID;
 
     vector<vector<double>> current_Group_worker_subTrajectoryDis;
+
     int sign = 0;
+
     int temp = 0;
+
     for (int i = 0; i < tasks.size(); i++)
     {
 
@@ -1075,17 +933,6 @@ void Basic_information::Grouping_Framework_Greedy(vector<TASK> &tasks, vector<WO
     }
 }
 
-/*****
- *
- * 根据任务分组工人
- * 当前窗口出现的工人
- * 获取轨迹距离
- * 计算剩余绕行距离
- *
- * 所有工人，所有工人轨迹距离，当前工人分组，当前工人分组的轨迹距离，当前时间、当前工人的ID，当前工人分组的剩余可用距离，所有工人的节点前项和,当前工人节点距离前项和
- *
- * 这里的
- */
 void Basic_information::groupWork_according_TaskGroup(vector<WORKER> &workers, vector<double> &Sumdis,
                                                       vector<CURRENT_WORKERS_GROUP> &current_workerGroup,
                                                       vector<double> &current_Group_workerSumdis, double nowTime, int current_workID,
@@ -1126,10 +973,6 @@ void Basic_information::groupWork_according_TaskGroup(vector<WORKER> &workers, v
     }
 }
 
-/******
- * 计算当前窗口中满足时间约束的task，
- * 即查看有没分组内超时的任务
- */
 void Basic_information::determine_Window_Task_Timeout(std::vector<CURRENT_TASK_GROUP> &taskList, double &nowTime)
 {
 
@@ -1138,12 +981,6 @@ void Basic_information::determine_Window_Task_Timeout(std::vector<CURRENT_TASK_G
                    taskList.end());
 }
 
-/**ShowCTMatching
- * 展示组内和全局的匹配结果
- * 有两种方式是因为我懒得修改了。
- * 其中vector<vector<int>>指的全局
- * vector<int> [number]:指的组内
- */
 void Basic_information::ShowCTMatching(vector<vector<int>> &CT_Worker, int current_Number_Workers)
 {
     int sumtasks = 0;
@@ -1190,11 +1027,6 @@ void Basic_information::ShowCTMatching(const char *filename, vector<vector<int>>
     outFile.close();
 }
 
-/**ShowCTMatching
- * 有两种方式是因为我懒得修改了。
- * 其中vector<vector<int>>指的全局
- * vector<int> [number]:指的组内
- */
 void Basic_information::ShowCTMatching(vector<int> CT_Worker[], int current_Number_Worker)
 {
     int sumtasks = 0;
@@ -1208,14 +1040,6 @@ void Basic_information::ShowCTMatching(vector<int> CT_Worker[], int current_Numb
     }
 }
 
-/***
- * 对任务和工人执行配对（这里嵌套诗婷的代码）
- * 将原本诗婷写在main函数的内容嵌套进来
- * 对于每个任务，计算任务的可用工人：、
- *      首先，满足range约束，满足最小声誉分数约束；
- *      其次，在匹配时再判断是否满足deadline约束，容量约束
- *      接着，然后计算与每个可用工人的距离，选择最近的工人
- */
 void Basic_information::match_WorkerTask_Greedy(vector<CURRENT_TASK_GROUP> &current_taskGroup, vector<CURRENT_WORKERS_GROUP> &current_workerGroup,
                                                 double current_window_endTime, vector<double> &current_Group_workerAD,
                                                 vector<vector<double>> &current_Group_worker_subTrajectoryDis)
@@ -1293,11 +1117,6 @@ void Basic_information::match_WorkerTask_Greedy(vector<CURRENT_TASK_GROUP> &curr
     ShowCTMatching(current_CT_Worker, current_Number_Worker);
 }
 
-/****
- *
- * 计算当工人和任务未匹配时,更新能进入下一窗口的工人和任务时间
- */
-
 void Basic_information::print_groupWork(vector<CURRENT_WORKERS_GROUP> selected_workers)
 {
     std::cout << " 当前组内的workers: ";
@@ -1315,9 +1134,6 @@ void Basic_information::print_groupWork(vector<CURRENT_WORKERS_GROUP> selected_w
     std::cout << std::endl;
 }
 
-/**
- * 打印工人和任务的所有信息
- */
 void Basic_information::print_info()
 {
 
@@ -1466,10 +1282,6 @@ void Basic_information::printf_Results_to_txt_num(double task_satis_results, dou
     avg_runtime += run_time;
 }
 
-/***
- *
- * 开始workerBatch的代码
- */
 void Basic_information::Grouping_Framework_WorkerBatch(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax,
                                                        vector<double> &Sumdis, vector<vector<double>> &global_Worker_subTrajectoryDis)
 
@@ -1530,9 +1342,6 @@ void Basic_information::Grouping_Framework_WorkerBatch(vector<TASK> &tasks, vect
     }
 }
 
-/**
- * 求解分组内工人和任务的偏好
- */
 void Basic_information::Compute_PTPW_Group_workerBatch(vector<vector<pair<int, double>>> &current_PT, vector<vector<pair<int, double>>> &current_PW,
                                                        vector<double> current_detour_distance[], vector<CURRENT_TASK_GROUP> &current_taskGroup,
                                                        vector<CURRENT_WORKERS_GROUP> &current_workerGroup, vector<int> current_poi[])
@@ -1609,13 +1418,6 @@ void Basic_information::match_WorkerTask_workerBatch(vector<CURRENT_TASK_GROUP> 
 
     computeMaxDitanceTask(current_MaxDistanceTask, current_taskGroup, current_window_endTime);
 
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
-
     iterator_Match_WorkBatch(current_workerGroup, current_taskGroup, current_PW, current_PT, current_Group_workerAD, current_detour_distance, current_Group_worker_subTrajectoryDis,
                              current_CT_Worker, current_MaxDistanceTask, &current_task_NeedTime, current_poi, current_window_endTime);
 
@@ -1671,11 +1473,6 @@ void Basic_information::iterator_Match_WorkBatch(vector<CURRENT_WORKERS_GROUP> &
 
                     CurrentTaskInPW[i]++;
                     if (Task_Available[current_task_id] == 0)
-                    /*
-                    && (find_if(current_PT[current_task_id].begin(), current_PT[current_task_id].end(), [i](const std::pair<int, double> &p)
-                                                                         { return p.second == i; }) != current_PT[current_task_id].end())
-
-                    */
                     {
                         double ttttt = 0;
 
@@ -1746,15 +1543,6 @@ void Basic_information::iterator_Match_WorkBatch(vector<CURRENT_WORKERS_GROUP> &
     }
 }
 
-/***
- * @param tasks 可用任务
- * @param workers 可用工人
- * @param Wmax 时间窗口
- * @param Tmax 任务窗口
- * @param Sumdis 距离之和
- * @param global_Worker_subTrajectoryDis 工人每个轨迹点前的距离之和
- * TPPG算法-DAG修改版
- */
 void Basic_information::Grouping_Framework_TPPG_DAG(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax, vector<double> &Sumdis,
                                                     vector<vector<double>> &global_Worker_subTrajectoryDis)
 {
@@ -1827,9 +1615,6 @@ void Basic_information::Grouping_Framework_TPPG_DAG(vector<TASK> &tasks, vector<
     }
 }
 
-/***
- * 更新当前工人及任务状态，并计算最大距离，并匹配对应工人及任务
- */
 void Basic_information::match_WorkerTask_TPPG_DAG(vector<CURRENT_TASK_GROUP> &current_taskGroup, vector<CURRENT_WORKERS_GROUP> &current_workerGroup,
                                                   double current_window_endTime, vector<double> &current_Group_workerAD,
                                                   vector<vector<double>> &current_Group_worker_subTrajectoryDis)
@@ -1906,9 +1691,6 @@ void Basic_information::match_WorkerTask_TPPG_DAG(vector<CURRENT_TASK_GROUP> &cu
     ShowCTMatching(current_CT_Worker, current_Number_Worker);
 }
 
-/***
- * 从可用工人中寻找到最适合任务的对应工人
- */
 int Basic_information::FindPreferedWorkerNew_TPPG_DAG(int worker_start_number, int taskid, vector<int> &current_Group_worker_AW, vector<double> &current_Group_workerAD,
                                                       vector<double> current_detour_distance[],
                                                       vector<vector<double>> &current_Group_worker_subTrajectoryDis, vector<int> CT_Worker[],
@@ -1967,26 +1749,6 @@ int Basic_information::FindPreferedWorkerNew_TPPG_DAG(int worker_start_number, i
     return best_workerid;
 }
 
-/***
- * TPPG算法
- */
-
-/***
- * 窗口划分框架
- * 首先根据当前任务分组，获取可以服务的工人
- * 其次考虑当前分组中任务未匹配且能继续分配到下一组的情况。
- *
- * 要求：修改groupTasks_addEndTime的第3、4条
- *
- * 1. 每一组task处于连续的时间窗口Wmax，Wmax；
- * 2. 一组内的task数量不超过Tmax。
- * 3. 若一组任务数量达到为Tmax时，则以当前current_taskGroup的时间重新创建新的窗口。
- *      3.1 任务和工人进行匹配
- *      3.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- * 4. 若已到达当前窗口时间current_window_endTime，纵然当前窗口current_window_endTime的task数量位到达Tmax也创建新的窗口。
- *      4.1 任务和工人进行匹配
- *      4.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- */
 void Basic_information::Grouping_Framework_TPPG(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax, vector<double> &Sumdis,
                                                 vector<vector<double>> &global_Worker_subTrajectoryDis)
 
@@ -2058,9 +1820,6 @@ void Basic_information::Grouping_Framework_TPPG(vector<TASK> &tasks, vector<WORK
     }
 }
 
-/***
- * 更新当前工人及任务状态，并计算最大距离，并匹配对应工人及任务
- */
 void Basic_information::match_WorkerTask_TPPG(vector<CURRENT_TASK_GROUP> &current_taskGroup, vector<CURRENT_WORKERS_GROUP> &current_workerGroup,
                                               double current_window_endTime, vector<double> &current_Group_workerAD,
                                               vector<vector<double>> &current_Group_worker_subTrajectoryDis)
@@ -2135,9 +1894,6 @@ void Basic_information::match_WorkerTask_TPPG(vector<CURRENT_TASK_GROUP> &curren
     ShowCTMatching(current_CT_Worker, current_Number_Worker);
 }
 
-/***
- * 从可用工人中寻找到最适合任务的对应工人
- */
 int Basic_information::FindPreferedWorkerNew_TPPG(int taskid, vector<int> &current_Group_worker_AW, vector<double> &current_Group_workerAD,
                                                   vector<double> current_detour_distance[],
                                                   vector<vector<double>> &current_Group_worker_subTrajectoryDis, vector<int> CT_Worker[],
@@ -2186,26 +1942,6 @@ int Basic_information::FindPreferedWorkerNew_TPPG(int taskid, vector<int> &curre
     return best_workerid;
 }
 
-/***
- * TPPG_batch算法
- */
-
-/***
- * 窗口划分框架
- * 首先根据当前任务分组，获取可以服务的工人
- * 其次考虑当前分组中任务未匹配且能继续分配到下一组的情况。
- *
- * 要求：修改groupTasks_addEndTime的第3、4条
- *
- * 1. 每一组task处于连续的时间窗口Wmax，Wmax；
- * 2. 一组内的task数量不超过Tmax。
- * 3. 若一组任务数量达到为Tmax时，则以当前current_taskGroup的时间重新创建新的窗口。
- *      3.1 任务和工人进行匹配
- *      3.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- * 4. 若已到达当前窗口时间current_window_endTime，纵然当前窗口current_window_endTime的task数量位到达Tmax也创建新的窗口。
- *      4.1 任务和工人进行匹配
- *      4.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- */
 void Basic_information::Grouping_Framework_TPPG_Batch(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax, vector<double> &Sumdis, vector<vector<double>> &global_Worker_subTrajectoryDis)
 
 {
@@ -2317,10 +2053,6 @@ void Basic_information::match_WorkerTask_TPPG_Batch(vector<CURRENT_TASK_GROUP> &
     {
         ++times;
 
-        /**
-         * 每个任务开始进行匹配请求
-         */
-
         for (int i = 0; i < current_ActiveTask.size(); i++)
         {
             int taskid = current_ActiveTask[i];
@@ -2349,13 +2081,6 @@ void Basic_information::match_WorkerTask_TPPG_Batch(vector<CURRENT_TASK_GROUP> &
         {
             int workerid = workerRID[j];
 
-            /**
-             * 1
-             * 下面根据工人的偏好列表
-             * 对发出请求的工人进行排序
-             * workerWasRequest最后得到的是排好序的任务请求列表
-             */
-
             std::unordered_map<int, int> index_map;
             for (int i = 0; i < current_PW[workerid].size(); ++i)
             {
@@ -2367,12 +2092,6 @@ void Basic_information::match_WorkerTask_TPPG_Batch(vector<CURRENT_TASK_GROUP> &
                       {
                           return index_map[left] < index_map[right];
                       });
-            /**
-             * 2
-             * 拍完顺序开始匹配判断是否满足约束条件
-             * 若满足，则task删除。
-             * 若工人匹配出超过容量，则删除
-             */
 
             for (int k = 0; k < workerWasRequest[workerid].size(); k++)
             {
@@ -2424,10 +2143,6 @@ void Basic_information::match_WorkerTask_TPPG_Batch(vector<CURRENT_TASK_GROUP> &
 
     ShowCTMatching(current_CT_Worker, current_Number_Worker);
 }
-
-/**
- * 4.4TSDA
- */
 
 void Basic_information::Grouping_Framework_TSDA(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax, vector<double> &Sumdis, vector<vector<double>> &global_Worker_subTrajectoryDis)
 
@@ -2530,13 +2245,6 @@ void Basic_information::match_WorkerTask_TSDA(vector<CURRENT_TASK_GROUP> &curren
     }
 
     computeMaxDitanceTask(current_MaxDistanceTask, current_taskGroup, current_window_endTime);
-
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
 
     while (!current_ActiveTask.empty())
     {
@@ -3034,13 +2742,6 @@ void Basic_information::match_WorkerTask_WSDA(vector<CURRENT_TASK_GROUP> &curren
 
     computeMaxDitanceTask(current_MaxDistanceTask, current_taskGroup, current_window_endTime);
 
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
-
     int matchingTimes = 0;
     while (!current_ActiveWorker.empty())
     {
@@ -3116,14 +2817,6 @@ void Basic_information::match_WorkerTask_WSDA(vector<CURRENT_TASK_GROUP> &curren
                 {
                     current_NextActiveWorker.erase(find(current_NextActiveWorker.begin(), current_NextActiveWorker.end(), workerid));
                 }
-
-                /*     vector<int>::iterator iter2 = find(NextActiveWorker.begin(), NextActiveWorker.end(), task_to_chase);
-                    if (iter2 == NextActiveWorker.end())
-                    {
-                     cout << "任务偏好列表已达最后一个，任务已移除！" << endl;
-                     cout << endl;
-                    }
-                    */
             }
         }
 
@@ -3198,15 +2891,6 @@ void Basic_information::UpdateTaskDeadline_WSDA(vector<CURRENT_TASK_GROUP> &curr
         }
     }
 }
-
-/***
- * 4.7-1
- * 根据混合排序得到已经排好序的（任务、工人）数据时间
- * 逐个初始化每个信息
- * 并按照时间进行匹配计算
- *  计算分为任务（或工人）两种形式
- *
- */
 
 void Basic_information::
     time_random_Framework()
@@ -3283,15 +2967,6 @@ void Basic_information::
     }
 }
 
-/***
- * 4.7-2
- * 根据混合排序得到已经排好序的（任务、工人）数据时间
- * 逐个初始化每个信息
- * 并按照时间进行匹配计算
- *  计算分为任务（或工人）两种形式
- *
- */
-
 void Basic_information::whole_Greedy_Framework()
 {
     vector<pair<WORKER, TASK>> hybird_datasets;
@@ -3354,10 +3029,6 @@ void Basic_information::whole_Greedy_Framework()
     }
 }
 
-/***
- * 计算并存储当前tasklist对应工人最小的poi点
- * 并返回最小的距离
- */
 double Basic_information::Caculate_mindist_whole(int global_workerid, int current_taskid, vector<CURRENT_TASK_GROUP> &task, vector<CURRENT_TASK_STATE> &taskState)
 {
     vector<POI> Trajectory;
@@ -3380,14 +3051,6 @@ double Basic_information::Caculate_mindist_whole(int global_workerid, int curren
     return mindis;
 }
 
-/***
- * 对新加入的信息进行处理
- * 先判断是否超时
- * 若加入工人
- *    计算每个任务和新工人之间的信息，并配对
- * 若加入任务
- *    计算每个工人和新任务之间的信息，并配对
- */
 void Basic_information::time_random_match(vector<CURRENT_TASK_GROUP> &current_taskGroup, vector<CURRENT_WORKERS_GROUP> &current_workerGroup, double current_Time, vector<CURRENT_WORKER_STATE> &workStates, vector<CURRENT_TASK_STATE> &taskStates, bool sign)
 {
 
@@ -3427,9 +3090,6 @@ void Basic_information::time_random_match(vector<CURRENT_TASK_GROUP> &current_ta
                                 cu_ts.MaxDistanceTask_orig -= 2 * dist;
                                 workStates.back().matched_MaxDistanceTask_orig.push_back(cu_ts.MaxDistanceTask_orig);
 
-                                /**
-                                 * 更新
-                                 */
                                 current_taskGroup[tempTid].sign = false;
                                 global_CT_Worker[arrive_global_workerID].push_back(current_taskGroup[tempTid].Original_Local);
 
@@ -3484,9 +3144,6 @@ void Basic_information::time_random_match(vector<CURRENT_TASK_GROUP> &current_ta
                             taskStates.back().MaxDistanceTask_orig -= 2 * dist;
                             cu_ws.matched_MaxDistanceTask_orig.push_back(taskStates.back().MaxDistanceTask_orig);
 
-                            /**
-                             * 更新
-                             */
                             current_taskGroup[current_Number_Task - 1].sign = false;
 
                             global_CT_Worker[arrive_global_workerID].push_back(current_taskGroup[current_Number_Task - 1].Original_Local);
@@ -3547,9 +3204,6 @@ void Basic_information::match_Whole(vector<CURRENT_TASK_GROUP> &current_taskGrou
 
                                 workStates.back().matched_MaxDistanceTask_orig.push_back(cu_ts.MaxDistanceTask_orig);
                                 taskStates[tempTid].MaxDistanceTask_orig -= 2 * dist;
-                                /**
-                                 * 更新
-                                 */
                                 current_taskGroup[tempTid].sign = false;
                                 global_CT_Worker[arrive_global_workerID].push_back(current_taskGroup[tempTid].Original_Local);
 
@@ -3598,9 +3252,6 @@ void Basic_information::match_Whole(vector<CURRENT_TASK_GROUP> &current_taskGrou
 
                             cu_ws.matched_MaxDistanceTask_orig.push_back(taskStates.back().MaxDistanceTask_orig - 2 * dist);
                             taskStates.back().MaxDistanceTask_orig -= 2 * dist;
-                            /**
-                             * 更新
-                             */
                             current_taskGroup[current_Number_Task - 1].sign = false;
                             global_CT_Worker[current_workerGroup[tempWid].Original_Local].push_back(current_taskGroup[current_Number_Task - 1].Original_Local);
                             if (cu_ws.matched_task.size() == Capacity)
@@ -3641,16 +3292,6 @@ void Basic_information::UpdateTaskDeadline_whole(int current_workerid, int taski
     global_MaxDistanceTask[current_taskGroup[taskid].Original_Local] = taskStates[taskid].MaxDistanceTask_orig;
 }
 
-/****
- *
- * 以任务为主导判断工人和任务能否匹配。
- *
- * 1. 判断工人到新任务的绕路距离与工人截止时间关系
- * 2. 判断插入新点对前后点的影响
- *      对前面的点无影响
- *      对后面的点的截止时间影响
- *
- */
 bool Basic_information::CurrentTask_Satisfy_whole(vector<CURRENT_TASK_GROUP> &current_taskGroup, vector<CURRENT_WORKERS_GROUP> &current_workerGroup, int current_taskid, vector<CURRENT_TASK_STATE> &taskStates, vector<CURRENT_WORKER_STATE> &workStates, double current_Time, int current_workerid, double *current_task_NeedTime)
 {
 
@@ -3757,11 +3398,6 @@ bool Basic_information::CurrentTask_Satisfy_whole(vector<CURRENT_TASK_GROUP> &cu
     }
 }
 
-/******
- * 移除不满足时间约束的工人和任务
- * 同时，工人的当前剩余绕路距离也会删除
- * 任务的相关信息也会删除
- */
 void Basic_information::erase_Task_worker_Timeout(std::vector<CURRENT_TASK_GROUP> &taskList, vector<CURRENT_WORKERS_GROUP> &workerList, double nowTime, vector<CURRENT_WORKER_STATE> &current_workerState, vector<CURRENT_TASK_STATE> &current_taskState)
 {
 
@@ -3902,13 +3538,6 @@ void Basic_information::match_WorkerTask_ReverseDA(vector<CURRENT_TASK_GROUP> &c
 
     computeMaxDitanceTask(current_MaxDistanceTask, current_taskGroup, current_window_endTime);
 
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
-
     while (!current_ActiveTask.empty())
     {
 
@@ -4009,13 +3638,6 @@ void Basic_information::match_WorkerTask_ReverseDA(vector<CURRENT_TASK_GROUP> &c
         }
     }
 
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
-
     int matchingTimes = 0;
     while (!current_ActiveWorker.empty())
     {
@@ -4088,14 +3710,6 @@ void Basic_information::match_WorkerTask_ReverseDA(vector<CURRENT_TASK_GROUP> &c
                 {
                     current_NextActiveWorker.erase(find(current_NextActiveWorker.begin(), current_NextActiveWorker.end(), workerid));
                 }
-
-                /*     vector<int>::iterator iter2 = find(NextActiveWorker.begin(), NextActiveWorker.end(), task_to_chase);
-                    if (iter2 == NextActiveWorker.end())
-                    {
-                     cout << "任务偏好列表已达最后一个，任务已移除！" << endl;
-                     cout << endl;
-                    }
-                    */
             }
         }
 
@@ -4207,9 +3821,6 @@ void Basic_information::match_WorkerTask_AlternateDA(vector<CURRENT_TASK_GROUP> 
 
         current_poi[i] = vector<int>(current_Number_Worker, 0);
         current_CW_Task[i] = -1;
-        /**
-         * 这里与TSDA结合
-         */
         if (current_PT[i].size() != 0)
         {
             current_ActiveTask.push_back(i);
@@ -4233,13 +3844,6 @@ void Basic_information::match_WorkerTask_AlternateDA(vector<CURRENT_TASK_GROUP> 
     }
 
     computeMaxDitanceTask(current_MaxDistanceTask, current_taskGroup, current_window_endTime);
-
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
 
     int matchingTimes = 0;
     while (!current_ActiveWorker.empty() || !current_ActiveTask.empty())
@@ -4408,14 +4012,6 @@ void Basic_information::match_WorkerTask_AlternateDA(vector<CURRENT_TASK_GROUP> 
                     {
                         current_NextActiveWorker.erase(find(current_NextActiveWorker.begin(), current_NextActiveWorker.end(), workerid));
                     }
-
-                    /*     vector<int>::iterator iter2 = find(NextActiveWorker.begin(), NextActiveWorker.end(), task_to_chase);
-                        if (iter2 == NextActiveWorker.end())
-                        {
-                         cout << "任务偏好列表已达最后一个，任务已移除！" << endl;
-                         cout << endl;
-                        }
-                        */
                 }
             }
 
@@ -4440,13 +4036,6 @@ void Basic_information::match_WorkerTask_AlternateDA(vector<CURRENT_TASK_GROUP> 
     ShowCTMatching(current_CT_Worker, current_Number_Worker);
 }
 
-/***
- * 读取全文需要的数据
- * 从本地获取数据
- * 以及对没用的数据进行生产
- * dataOption
- *      1：Berlin，   2：G-mission   3:T-drive
- */
 bool optionDataset(bool distributionOption, int dataOption, Basic_information &info, vector<vector<double>> &global_Worker_subTrajectoryDis, vector<double> &Sumdis, double workEndtimeX, double taskEndtimeX, double rangeX, double scoreX)
 {
 
@@ -4522,10 +4111,6 @@ bool optionDataset(bool distributionOption, int dataOption, Basic_information &i
 }
 
 /***
- *
- */
-
-/***
  * 下面是多余的函数
  */
 
@@ -4565,16 +4150,6 @@ void Basic_information::Initialize_group_workNext(vector<double> &AD, vector<dou
     }
 }
 
-/****
- *已修改，增加了三个
- *  1-3 简单的剪枝，4具体的操作
- *
- * 1.判断分数约束
- * 2.判断绕路距离与工人范围关系
- * 3.判断收益约束
- * 4.判断工人和任务之间的时间距离关系CurrentTask_Satisfy
-
- */
 int Basic_information::FindLatestWorkerNew_Greedy_workNext(int taskid, vector<int> &current_Group_worker_AW, vector<double> &current_Group_workerAD, vector<double> current_detour_distance[], vector<vector<double>> &current_Group_worker_subTrajectoryDis, vector<int> CT_Worker[], double MaxDistanceTask[], double *current_task_NeedTime, vector<CURRENT_TASK_GROUP> &current_taskGroup, vector<CURRENT_WORKERS_GROUP> &current_workerGroup, vector<int> poi[], double nowtime)
 {
 
@@ -4612,16 +4187,6 @@ int Basic_information::FindLatestWorkerNew_Greedy_workNext(int taskid, vector<in
     return latest_workerid;
 }
 
-/****
- *
- * 以任务为主导判断工人和任务能否匹配。
- *
- * 1. 判断工人到新任务的绕路距离与工人截止时间关系
- * 2. 判断插入新点对前后点的影响
- *      对前面的点无影响
- *      对后面的点的截止时间影响
- *
- */
 bool Basic_information::IfReplace_workNext(int workerid, int taskid, int assignedtaskid, vector<double> &AD, vector<double> detour_distance[], vector<vector<double>> &Worker_subTrajectoryDis, vector<vector<int>> &CT_Worker, vector<int> poi[], double MaxDistanceTask[], double *current_task_NeedTime, double beforesumDis, vector<CURRENT_TASK_GROUP> &current_taskGroup, vector<CURRENT_WORKERS_GROUP> &current_workerGroup, double nowtime)
 {
 
@@ -5125,22 +4690,6 @@ void Basic_information::updata_current_Info_workNext(vector<CURRENT_TASK_GROUP> 
     temp_task_group.clear();
 }
 
-/***
- * 窗口划分框架
- * 首先根据当前任务分组，获取可以服务的工人
- * 其次考虑当前分组中任务未匹配且能继续分配到下一组的情况。
- *
- * 要求：修改groupTasks_addEndTime的第3、4条
- *
- * 1. 每一组task处于连续的时间窗口Wmax，Wmax；
- * 2. 一组内的task数量不超过Tmax。
- * 3. 若一组任务数量达到为Tmax时，则以当前current_taskGroup的时间重新创建新的窗口。
- *      3.1 任务和工人进行匹配
- *      3.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- * 4. 若已到达当前窗口时间current_window_endTime，纵然当前窗口current_window_endTime的task数量位到达Tmax也创建新的窗口。
- *      4.1 任务和工人进行匹配
- *      4.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- */
 void Basic_information::Grouping_Framework_Greedy_workNext(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax, vector<double> &Sumdis, vector<vector<double>> &global_Worker_subTrajectoryDis)
 
 {
@@ -5201,18 +4750,6 @@ void Basic_information::Grouping_Framework_Greedy_workNext(vector<TASK> &tasks, 
         updata_current_Info_workNext(current_taskGroup, current_Group_worker, current_Group_workerAD, current_Group_worker_subTrajectoryDis, current_Group_workerSumdis);
     }
 }
-
-/*****
- *
- * 根据任务分组工人
- * 当前窗口出现的工人
- * 获取轨迹距离
- * 计算剩余绕行距离
- *
- * 所有工人，所有工人轨迹距离，当前工人分组，当前工人分组的轨迹距离，当前时间、当前工人的ID，当前工人分组的剩余可用距离，所有工人的节点前项和,当前工人节点距离前项和
- *
- * 这里的
- */
 
 void Basic_information::groupWork_according_TaskGroup_workNext(vector<WORKER> &workers, vector<double> &Sumdis, vector<CURRENT_WORKERS_GROUP> &current_workerGroup,
                                                                vector<double> &current_Group_workerSumdis, double current_window_startTime, double nowTime, int current_workID, vector<double> &current_Group_workerAD,
@@ -5313,14 +4850,6 @@ void Basic_information::groupWork_according_TaskGroup_workNext(vector<WORKER> &w
     }
 }
 
-/***
- * 对任务和工人执行配对（这里嵌套诗婷的代码）
- * 将原本诗婷写在main函数的内容嵌套进来
- * 对于每个任务，计算任务的可用工人：、
- *      首先，满足range约束，满足最小声誉分数约束；
- *      其次，在匹配时再判断是否满足deadline约束，容量约束
- *      接着，然后计算与每个可用工人的距离，选择最近的工人
- */
 void Basic_information::match_WorkerTask_Greedy_workNext(vector<CURRENT_TASK_GROUP> &current_taskGroup, vector<CURRENT_WORKERS_GROUP> &current_workerGroup, double current_window_endTime, vector<double> &current_Group_workerAD, vector<vector<double>> &current_Group_worker_subTrajectoryDis)
 {
     int current_Number_Worker = current_workerGroup.size();
@@ -5404,10 +4933,6 @@ void Basic_information::match_WorkerTask_Greedy_workNext(vector<CURRENT_TASK_GRO
     ShowCTMatching(current_CT_Worker, current_Number_Worker);
 }
 
-/***
- *
- * 开始workerBatch的代码
- */
 void Basic_information::Grouping_Framework_WorkerBatch_workNext(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax, vector<double> &Sumdis, vector<vector<double>> &global_Worker_subTrajectoryDis)
 
 {
@@ -5467,9 +4992,6 @@ void Basic_information::Grouping_Framework_WorkerBatch_workNext(vector<TASK> &ta
     }
 }
 
-/**
- * 求解分组内工人和任务的偏好
- */
 void Basic_information::Compute_PTPW_Group_workerBatch_workNext(vector<vector<pair<int, double>>> &current_PT, vector<vector<pair<int, double>>> &current_PW, vector<double> current_detour_distance[], vector<CURRENT_TASK_GROUP> &current_taskGroup, vector<CURRENT_WORKERS_GROUP> &current_workerGroup, vector<int> current_poi[])
 {
 
@@ -5536,13 +5058,6 @@ void Basic_information::match_WorkerTask_workerBatch_workNext(vector<CURRENT_TAS
 
     computeMaxDitanceTask(current_MaxDistanceTask, current_taskGroup, current_window_endTime);
 
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
-
     iterator_Match_WorkBatch_workNext(current_workerGroup, current_taskGroup, current_PW, current_PT, current_Group_workerAD, current_detour_distance, current_Group_worker_subTrajectoryDis,
                                       current_CT_Worker, current_MaxDistanceTask, &current_task_NeedTime, current_poi, current_window_endTime);
 
@@ -5595,11 +5110,6 @@ void Basic_information::iterator_Match_WorkBatch_workNext(vector<CURRENT_WORKERS
 
                     CurrentTaskInPW[i]++;
                     if (Task_Available[current_task_id] == 0)
-                    /*
-                    && (find_if(current_PT[current_task_id].begin(), current_PT[current_task_id].end(), [i](const std::pair<int, double> &p)
-                                                                         { return p.second == i; }) != current_PT[current_task_id].end())
-
-                    */
                     {
 
                         if (CurrentTask_Satisfy_workNext(current_taskGroup, current_workerGroup, i, current_task_id, current_Group_workerAD, current_detour_distance, current_Group_worker_subTrajectoryDis, current_CT_Worker, current_poi, MaxDistanceTask, current_task_NeedTime, nowtime))
@@ -5679,26 +5189,6 @@ void Basic_information::iterator_Match_WorkBatch_workNext(vector<CURRENT_WORKERS
     }
 }
 
-/***
- * TPPG算法
- */
-
-/***
- * 窗口划分框架
- * 首先根据当前任务分组，获取可以服务的工人
- * 其次考虑当前分组中任务未匹配且能继续分配到下一组的情况。
- *
- * 要求：修改groupTasks_addEndTime的第3、4条
- *
- * 1. 每一组task处于连续的时间窗口Wmax，Wmax；
- * 2. 一组内的task数量不超过Tmax。
- * 3. 若一组任务数量达到为Tmax时，则以当前current_taskGroup的时间重新创建新的窗口。
- *      3.1 任务和工人进行匹配
- *      3.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- * 4. 若已到达当前窗口时间current_window_endTime，纵然当前窗口current_window_endTime的task数量位到达Tmax也创建新的窗口。
- *      4.1 任务和工人进行匹配
- *      4.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- */
 void Basic_information::Grouping_Framework_TPPG_workNext(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax, vector<double> &Sumdis, vector<vector<double>> &global_Worker_subTrajectoryDis)
 
 {
@@ -5883,26 +5373,6 @@ int Basic_information::FindPreferedWorkerNew_TPPG_workNext(int taskid, vector<in
     return best_workerid;
 }
 
-/***
-TPPG_batch算法
-    * /
-
-/***
- * 窗口划分框架
- * 首先根据当前任务分组，获取可以服务的工人
- * 其次考虑当前分组中任务未匹配且能继续分配到下一组的情况。
- *
- * 要求：修改groupTasks_addEndTime的第3、4条
- *
- * 1. 每一组task处于连续的时间窗口Wmax，Wmax；
- * 2. 一组内的task数量不超过Tmax。
- * 3. 若一组任务数量达到为Tmax时，则以当前current_taskGroup的时间重新创建新的窗口。
- *      3.1 任务和工人进行匹配
- *      3.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- * 4. 若已到达当前窗口时间current_window_endTime，纵然当前窗口current_window_endTime的task数量位到达Tmax也创建新的窗口。
- *      4.1 任务和工人进行匹配
- *      4.2 对于未匹配的任务划分到下一组，修改任务的开始时间（为了防止计算下一分组开始时间出错）
- */
 void Basic_information::Grouping_Framework_TPPG_Batch_workNext(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax, vector<double> &Sumdis, vector<vector<double>> &global_Worker_subTrajectoryDis)
 
 {
@@ -6013,10 +5483,6 @@ void Basic_information::match_WorkerTask_TPPG_Batch_workNext(vector<CURRENT_TASK
     {
         ++times;
 
-        /**
-         * 每个任务开始进行匹配请求
-         */
-
         for (int i = 0; i < current_ActiveTask.size(); i++)
         {
             int taskid = current_ActiveTask[i];
@@ -6045,13 +5511,6 @@ void Basic_information::match_WorkerTask_TPPG_Batch_workNext(vector<CURRENT_TASK
         {
             int workerid = workerRID[j];
 
-            /**
-             * 1
-             * 下面根据工人的偏好列表
-             * 对发出请求的工人进行排序
-             * workerWasRequest最后得到的是排好序的任务请求列表
-             */
-
             std::unordered_map<int, int> index_map;
             for (int i = 0; i < current_PW[workerid].size(); ++i)
             {
@@ -6063,12 +5522,6 @@ void Basic_information::match_WorkerTask_TPPG_Batch_workNext(vector<CURRENT_TASK
                       {
                           return index_map[left] < index_map[right];
                       });
-            /**
-             * 2
-             * 拍完顺序开始匹配判断是否满足约束条件
-             * 若满足，则task删除。
-             * 若工人匹配出超过容量，则删除
-             */
 
             for (int k = 0; k < workerWasRequest[workerid].size(); k++)
             {
@@ -6123,10 +5576,6 @@ void Basic_information::match_WorkerTask_TPPG_Batch_workNext(vector<CURRENT_TASK
 
     ShowCTMatching(current_CT_Worker, current_Number_Worker);
 }
-
-/**
- * 4.4TSDA
- */
 
 void Basic_information::Grouping_Framework_TSDA_workNext(vector<TASK> &tasks, vector<WORKER> &workers, double Wmax, int Tmax, vector<double> &Sumdis, vector<vector<double>> &global_Worker_subTrajectoryDis)
 
@@ -6228,13 +5677,6 @@ void Basic_information::match_WorkerTask_TSDA_workNext(vector<CURRENT_TASK_GROUP
     }
 
     computeMaxDitanceTask(current_MaxDistanceTask, current_taskGroup, current_window_endTime);
-
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
 
     while (!current_ActiveTask.empty())
     {
@@ -6764,13 +6206,6 @@ void Basic_information::match_WorkerTask_WSDA_workNext(vector<CURRENT_TASK_GROUP
 
     computeMaxDitanceTask(current_MaxDistanceTask, current_taskGroup, current_window_endTime);
 
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
-
     int matchingTimes = 0;
     while (!current_ActiveWorker.empty())
     {
@@ -6839,14 +6274,6 @@ void Basic_information::match_WorkerTask_WSDA_workNext(vector<CURRENT_TASK_GROUP
                 {
                     current_NextActiveWorker.erase(find(current_NextActiveWorker.begin(), current_NextActiveWorker.end(), workerid));
                 }
-
-                /*     vector<int>::iterator iter2 = find(NextActiveWorker.begin(), NextActiveWorker.end(), task_to_chase);
-                    if (iter2 == NextActiveWorker.end())
-                    {
-                     cout << "任务偏好列表已达最后一个，任务已移除！" << endl;
-                     cout << endl;
-                    }
-                    */
             }
         }
 
@@ -7077,13 +6504,6 @@ void Basic_information::match_WorkerTask_ReverseDA_workNext(vector<CURRENT_TASK_
 
     computeMaxDitanceTask(current_MaxDistanceTask, current_taskGroup, current_window_endTime);
 
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
-
     while (!current_ActiveTask.empty())
     {
 
@@ -7177,13 +6597,6 @@ void Basic_information::match_WorkerTask_ReverseDA_workNext(vector<CURRENT_TASK_
         }
     }
 
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
-
     int matchingTimes = 0;
     while (!current_ActiveWorker.empty())
     {
@@ -7252,14 +6665,6 @@ void Basic_information::match_WorkerTask_ReverseDA_workNext(vector<CURRENT_TASK_
                 {
                     current_NextActiveWorker.erase(find(current_NextActiveWorker.begin(), current_NextActiveWorker.end(), workerid));
                 }
-
-                /*     vector<int>::iterator iter2 = find(NextActiveWorker.begin(), NextActiveWorker.end(), task_to_chase);
-                    if (iter2 == NextActiveWorker.end())
-                    {
-                     cout << "任务偏好列表已达最后一个，任务已移除！" << endl;
-                     cout << endl;
-                    }
-                    */
             }
         }
 
@@ -7382,9 +6787,6 @@ void Basic_information::match_WorkerTask_AlternateDA_workNext(vector<CURRENT_TAS
     }
 
     Compute_PTPW_Group_workerBatch_workNext(current_PT, current_PW, current_detour_distance, current_taskGroup, current_workerGroup, current_poi);
-    /**
-     * 任务hy
-     */
     for (int i = 0; i < current_taskGroup.size(); i++)
     {
         if (current_PT[i].size() != 0)
@@ -7397,10 +6799,6 @@ void Basic_information::match_WorkerTask_AlternateDA_workNext(vector<CURRENT_TAS
     {
         return;
     }
-
-    /**
-     * 工人hy
-     */
 
     int current_num_of_chased_tasks[current_Number_Worker] = {0};
 
@@ -7421,20 +6819,7 @@ void Basic_information::match_WorkerTask_AlternateDA_workNext(vector<CURRENT_TAS
 
     computeMaxDitanceTask(current_MaxDistanceTask, current_taskGroup, current_window_endTime);
 
-    /**
-     * 迭代匹配
-     * 工人批量时，工人不可用或者任务不可用停止循环匹配
-     * 未匹配或匹配失败的批次工人优先匹配
-     * 偏好列表ORDER
-     */
-
     int flagState = 0;
-    /***
-     * 0:两个都没完成
-     * 1:任务完成
-     * 2:工人完成
-     * 3:两个皆完成
-     */
     int matchingTimes = 0;
     while (flagState < 3)
     {
@@ -7506,14 +6891,6 @@ void Basic_information::match_WorkerTask_AlternateDA_workNext(vector<CURRENT_TAS
                     {
                         current_NextActiveWorker.erase(find(current_NextActiveWorker.begin(), current_NextActiveWorker.end(), workerid));
                     }
-
-                    /*     vector<int>::iterator iter2 = find(NextActiveWorker.begin(), NextActiveWorker.end(), task_to_chase);
-                        if (iter2 == NextActiveWorker.end())
-                        {
-                         cout << "任务偏好列表已达最后一个，任务已移除！" << endl;
-                         cout << endl;
-                        }
-                        */
                 }
             }
 
@@ -7597,13 +6974,6 @@ void Basic_information::match_WorkerTask_AlternateDA_workNext(vector<CURRENT_TAS
 
             break;
         }
-
-        /**
-         * 迭代匹配
-         * 工人批量时，工人不可用或者任务不可用停止循环匹配
-         * 未匹配或匹配失败的批次工人优先匹配
-         * 偏好列表ORDER
-         */
 
         current_ActiveTask.clear();
         for (int i = 0; i < current_NextActiveTask.size(); i++)
