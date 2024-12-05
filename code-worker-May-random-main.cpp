@@ -105,9 +105,6 @@ int main(int argc, char const *argv[])
                                             {
                                                 if (algorithmOption == 0)
                                                 {
-                                                    /***
-                                                     * 贪心算法的计时开始
-                                                     */
 
                                                     alg_name = "greedy-Algorithm";
                                                     info.begin_Algorithm(alg_name);
@@ -121,9 +118,6 @@ int main(int argc, char const *argv[])
 
                                                 else if (algorithmOption == 11)
                                                 {
-                                                    /*****
-                                                     * TPPG算法 计时开始
-                                                     */
                                                     alg_name = "TPPG-Algorithm";
                                                     info.begin_Algorithm(alg_name);
                                                     auto start = std::chrono::high_resolution_clock::now();
@@ -135,9 +129,6 @@ int main(int argc, char const *argv[])
 
                                                 else if (algorithmOption == 21)
                                                 {
-                                                    /*****
-                                                     * WPPG算法 计时开始,,虽然已经完成，但是还有可能存在瑕疵需要修稿
-                                                     */
                                                     alg_name = "WPPG-Algorithm";
                                                     info.begin_Algorithm(alg_name);
                                                     auto start = std::chrono::high_resolution_clock::now();
@@ -149,9 +140,6 @@ int main(int argc, char const *argv[])
 
                                                 else if (algorithmOption == 1)
                                                 {
-                                                    /*****
-                                                     * TPPGbatch算法 计时开始还没开始修改。
-                                                     */
                                                     alg_name = "TPPG-batch-Algorithm";
                                                     info.begin_Algorithm(alg_name);
                                                     auto start = std::chrono::high_resolution_clock::now();
@@ -163,9 +151,6 @@ int main(int argc, char const *argv[])
 
                                                 else if (algorithmOption == 41)
                                                 {
-                                                    /*****
-                                                     * workerBatch 计时开始
-                                                     */
                                                     alg_name = "workerBatch-Algorithm";
                                                     info.begin_Algorithm(alg_name);
                                                     auto start = std::chrono::high_resolution_clock::now();
@@ -176,9 +161,6 @@ int main(int argc, char const *argv[])
                                                 }
                                                 else if (algorithmOption == 2)
                                                 {
-                                                    /*****
-                                                     * TSDA算法 计时开始,,虽然已经完成，但是还有可能存在瑕疵需要修稿
-                                                     */
                                                     alg_name = "TSDA-Algorithm";
                                                     info.begin_Algorithm(alg_name);
                                                     auto start = std::chrono::high_resolution_clock::now();
@@ -189,9 +171,6 @@ int main(int argc, char const *argv[])
                                                 }
                                                 else if (algorithmOption == 61)
                                                 {
-                                                    /*****
-                                                     * WSDA算法 计时开始,,虽然已经完成，但是还有可能存在瑕疵需要修稿
-                                                     */
                                                     alg_name = "WSDA-Algorithm";
                                                     info.begin_Algorithm(alg_name);
                                                     auto start = std::chrono::high_resolution_clock::now();
@@ -203,9 +182,6 @@ int main(int argc, char const *argv[])
 
                                                 else if (algorithmOption == 3)
                                                 {
-                                                    /*****
-                                                     * 反向DA匹配。先工人后任务。
-                                                     */
 
                                                     alg_name = "ReverseDA-Algorithm";
                                                     info.begin_Algorithm(alg_name);
@@ -218,9 +194,6 @@ int main(int argc, char const *argv[])
 
                                                 else if (algorithmOption == 81)
                                                 {
-                                                    /*****
-                                                     * 交替DA匹配。先工人后任务。
-                                                     */
 
                                                     alg_name = "AlternateDA-Algorithm";
                                                     info.begin_Algorithm(alg_name);
@@ -233,9 +206,6 @@ int main(int argc, char const *argv[])
                                                 else if (algorithmOption == 91)
 
                                                 {
-                                                    /*****
-                                                     * time_random 算法 按照时间先来先匹配,没有涉及双边的要求
-                                                     */
 
                                                     alg_name = "time_random-Algorithm";
                                                     info.begin_Algorithm(alg_name);
